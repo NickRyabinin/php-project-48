@@ -23,27 +23,40 @@ function genDiff(string $pathToFile1, string $pathToFile2, string $formatName): 
         ) {
             if ($parsedContentOfFile1[$uniqueKey] === $parsedContentOfFile2[$uniqueKey]) {
                 $flag = ' ';
-                $differ[] = "  {$flag} {$uniqueKey}: {$$parsedContentOfFile1[$uniqueKey]}";
+                $value = stringifyBooleanValue($parsedContentOfFile1[$uniqueKey]);
+                $differ[] = "  {$flag} {$uniqueKey}: {$value}";
             } else {
                 $flag = '-';
-                $differ[] = "  {$flag} {$uniqueKey}: {$$parsedContentOfFile1[$uniqueKey]}";
+                $value = stringifyBooleanValue($parsedContentOfFile1[$uniqueKey]);
+                $differ[] = "  {$flag} {$uniqueKey}: {$value}";
                 $flag = '+';
-                $differ[] = "  {$flag} {$uniqueKey}: {$$parsedContentOfFile2[$uniqueKey]}";
+                $value = stringifyBooleanValue($parsedContentOfFile2[$uniqueKey]);
+                $differ[] = "  {$flag} {$uniqueKey}: {$value}";
             }
         } elseif (
             array_key_exists($uniqueKey, $parsedContentOfFile1)
             && !array_key_exists($uniqueKey, $parsedContentOfFile2)
         ) {
             $flag = '-';
-            $differ[] = "  {$flag} {$uniqueKey}: {$$parsedContentOfFile1[$uniqueKey]}";
+            $value = stringifyBooleanValue($parsedContentOfFile1[$uniqueKey]);
+            $differ[] = "  {$flag} {$uniqueKey}: {$value}";
         } elseif (
             !array_key_exists($uniqueKey, $parsedContentOfFile1)
             && array_key_exists($uniqueKey, $parsedContentOfFile2)
         ) {
             $flag = '+';
-            $differ[] = "  {$flag} {$uniqueKey}: {$$parsedContentOfFile2[$uniqueKey]}";
+            $value = stringifyBooleanValue($parsedContentOfFile2[$uniqueKey]);
+            $differ[] = "  {$flag} {$uniqueKey}: {$value}";
         }
     }
     $result = implode("\n", $differ);
     return "{\n{$result}\n}";
+}
+
+function stringifyBooleanValue($value)
+{
+    if (is_bool($value)) {
+        return $value ? 'true' : 'false';
+    }
+    return $value;
 }

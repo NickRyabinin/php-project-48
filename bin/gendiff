@@ -25,13 +25,12 @@ Options:
   --format <fmt>                Report format [default: stylish]
 DOC;
 
-$args = Docopt::handle($doc, array('version'=>'gendiff v. 0.1'));
+$args = Docopt::handle($doc, array('version'=>'gendiff v.1.0'));
 
 $pathToFile1 = $args['<firstFile>'];
 $pathToFile2 = $args['<secondFile>'];
 $formatName = $args['--format'];
 
-// $diff = genDiff($args['<firstFile>'], $args['<secondFile>'], $args['--format']);
 $diff = genDiff($pathToFile1, $pathToFile2, $formatName);
 
 print_r($diff);
