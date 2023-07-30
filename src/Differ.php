@@ -2,13 +2,12 @@
 
 namespace Differ\Differ;
 
+use function Differ\Parsers\parse;
+
 function genDiff(string $pathToFile1, string $pathToFile2, string $formatName): string
 {
-    $contentOfFile1 = file_get_contents($pathToFile1);
-    $contentOfFile2 = file_get_contents($pathToFile2);
-
-    $parsedContentOfFile1 = json_decode($contentOfFile1, true);
-    $parsedContentOfFile2 = json_decode($contentOfFile2, true);
+    $parsedContentOfFile1 = parse($pathToFile1);
+    $parsedContentOfFile2 = parse($pathToFile2);
 
     $allUniqueKeys = array_unique(array_merge(array_keys($parsedContentOfFile1), array_keys($parsedContentOfFile2)));
     sort($allUniqueKeys);
