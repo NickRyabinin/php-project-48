@@ -6,8 +6,8 @@ use Symfony\Component\Yaml\Yaml;
 
 function getFileContent(string $pathToFile)
 {
-    $contentOfFile = file_get_contents($pathToFile);
-    return ($contentOfFile) ? $contentOfFile : exit("File {$pathToFile} not found");
+    $contentOfFile = @file_get_contents($pathToFile);
+    return ($contentOfFile) ? $contentOfFile : exit("\nFile '{$pathToFile}' not found!\n");
 }
 
 function parse(string $pathToFile)
@@ -23,7 +23,7 @@ function parse(string $pathToFile)
             $parsedContentOfFile = Yaml::parse($contentOfFile);
             break;
         default:
-            exit("Unsupported format {$extensionOfFile} of incoming file!");
+            exit("\nUnsupported format '{$extensionOfFile}' of incoming file!\n");
     }
     return $parsedContentOfFile;
 }
