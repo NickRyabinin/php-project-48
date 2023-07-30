@@ -16,14 +16,20 @@ class GenDiffTest extends TestCase
         $expected = file_get_contents($this->getPathToFixture('expectedSimple'));
         $this->assertEquals($expected, $actual);
 
-        $fixture1 = $this->getPathToFixture('file1.yml');
-        $fixture2 = $this->getPathToFixture('file2.yml');
+        $fixture1 = $this->getPathToFixture('file1.yaml');
+        $fixture2 = $this->getPathToFixture('file2.yaml');
         $actual = genDiff($fixture1, $fixture2, 'stylish');
         $expected = file_get_contents($this->getPathToFixture('expectedSimple'));
         $this->assertEquals($expected, $actual);
 
         $fixture1 = $this->getPathToFixture('file3.json');
         $fixture2 = $this->getPathToFixture('file4.json');
+        $actual = genDiff($fixture1, $fixture2, 'stylish');
+        $expected = file_get_contents($this->getPathToFixture('expectedNested'));
+        $this->assertEquals($expected, $actual);
+
+        $fixture1 = $this->getPathToFixture('file3.yaml');
+        $fixture2 = $this->getPathToFixture('file4.yaml');
         $actual = genDiff($fixture1, $fixture2, 'stylish');
         $expected = file_get_contents($this->getPathToFixture('expectedNested'));
         $this->assertEquals($expected, $actual);
