@@ -21,26 +21,24 @@ function makeDiff($parsedContentOfFile1, $parsedContentOfFile2)
     $allUniqueKeys = array_unique(array_merge(array_keys($parsedContentOfFile1), array_keys($parsedContentOfFile2)));
     sort($allUniqueKeys);
 
+    $flag = '';
     $differ = [];
 
     foreach ($allUniqueKeys as $uniqueKey) {
-        $value1 = $parsedContentOfFile1[$uniqueKey] ?? null;
-        $value2 = $parsedContentOfFile2[$uniqueKey] ?? null;
-
         if (
             array_key_exists($uniqueKey, $parsedContentOfFile1)
             && array_key_exists($uniqueKey, $parsedContentOfFile2)
         ) {
-            if ($value1 === $value2) {
+            if ($parsedContentOfFile1[$uniqueKey] === $parsedContentOfFile2[$uniqueKey]) {
                 $flag = ' ';
-                $value = stringifyValue($value1);
+                $value = stringifyValue($parsedContentOfFile1[$uniqueKey]);
                 $differ[] = "  {$flag} {$uniqueKey}: {$value}";
             } else {
                 $flag = '-';
-                $value = stringifyValue($value1);
+                $value = stringifyValue($parsedContentOfFile1[$uniqueKey]);
                 $differ[] = "  {$flag} {$uniqueKey}: {$value}";
                 $flag = '+';
-                $value = stringifyValue($value2);
+                $value = stringifyValue($parsedContentOfFile2[$uniqueKey]);
                 $differ[] = "  {$flag} {$uniqueKey}: {$value}";
             }
         } elseif (
@@ -48,14 +46,14 @@ function makeDiff($parsedContentOfFile1, $parsedContentOfFile2)
             && !array_key_exists($uniqueKey, $parsedContentOfFile2)
         ) {
             $flag = '-';
-            $value = stringifyValue($value1);
+            $value = stringifyValue($parsedContentOfFile1[$uniqueKey]);
             $differ[] = "  {$flag} {$uniqueKey}: {$value}";
         } elseif (
             !array_key_exists($uniqueKey, $parsedContentOfFile1)
             && array_key_exists($uniqueKey, $parsedContentOfFile2)
         ) {
             $flag = '+';
-            $value = stringifyValue($value2);
+            $value = stringifyValue($parsedContentOfFile2[$uniqueKey]);
             $differ[] = "  {$flag} {$uniqueKey}: {$value}";
         }
     }
