@@ -27,48 +27,40 @@ function makeDiff($parsedContentOfFile1, $parsedContentOfFile2)
         $value1 = $parsedContentOfFile1[$uniqueKey] ?? null;
         $value2 = $parsedContentOfFile2[$uniqueKey] ?? null;
 
-        if (
-            array_key_exists($uniqueKey, $parsedContentOfFile1)
-            && array_key_exists($uniqueKey, $parsedContentOfFile2)
-        ) {
-            if ($value1 === $value2) {
-                $flag = ' ';
-                $value = stringifyValue($value1);
-                $differ[] = "  {$flag} {$uniqueKey}: {$value}";
-            } else {
-                $flag = '-';
-                $value = stringifyValue($value1);
-                $differ[] = "  {$flag} {$uniqueKey}: {$value}";
-                $flag = '+';
-                $value = stringifyValue($value2);
-                $differ[] = "  {$flag} {$uniqueKey}: {$value}";
-            }
-        } elseif (
-            array_key_exists($uniqueKey, $parsedContentOfFile1)
-            && !array_key_exists($uniqueKey, $parsedContentOfFile2)
-        ) {
-            $flag = '-';
-            $value = stringifyValue($value1);
-            $differ[] = "  {$flag} {$uniqueKey}: {$value}";
-        } elseif (
-            !array_key_exists($uniqueKey, $parsedContentOfFile1)
-            && array_key_exists($uniqueKey, $parsedContentOfFile2)
-        ) {
-            $flag = '+';
-            $value = stringifyValue($value2);
-            $differ[] = "  {$flag} {$uniqueKey}: {$value}";
+        if (is_array($value1) && is_array($value2)) {
+            $differ[] = ['status' => 'nested',
+                'key' => $uniqueKey,
+                'value1' => makeDiff($value1, $value2),
+                'value2' => null];
+        }
+
+        if (!array_key_exists($uniqueKey, $parsedContentOfFile1)) {
+            $differ[] = ['status' => 'added',
+                'key' => $uniqueKey,
+                'value1' => $value2,
+                'value2' => null];
+        }
+
+        if (!array_key_exists($uniqueKey, $parsedContentOfFile2)) {
+            $differ[] = ['status' => 'removed',
+                'key' => $uniqueKey,
+                'value1' => $value1,
+                'value2' => null];
+        }
+
+        if ($value1 === $value2) {
+            $differ[] = ['status' => 'same',
+            'key' => $uniqueKey,
+            'value1' => $value1,
+            'value2' => null];
+        }
+
+        if ($value1 !== $value2) {
+            $differ[] = ['status' => 'updated',
+            'key' => $uniqueKey,
+            'value1' => $value1,
+            'value2' => $value2];
         }
     }
     return $differ;
-}
-
-function stringifyValue($value)
-{
-    if (is_null($value)) {
-        return 'null';
-    }
-    if (is_bool($value)) {
-        return $value ? 'true' : 'false';
-    }
-    return $value;
 }
