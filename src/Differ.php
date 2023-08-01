@@ -16,12 +16,10 @@ function genDiff(string $pathToFile1, string $pathToFile2, string $formatName = 
     return $result;
 }
 
-function makeDiff($parsedContentOfFile1, $parsedContentOfFile2)
+function makeDiff(array $parsedContentOfFile1, array $parsedContentOfFile2): array
 {
-    $allUniqueKeys = array_unique(array_merge(array_keys($parsedContentOfFile1), array_keys($parsedContentOfFile2)));
-    sort($allUniqueKeys);
-
     $differ = [];
+    $allUniqueKeys = getSortedUniqueKeys($parsedContentOfFile1, $parsedContentOfFile2);
 
     foreach ($allUniqueKeys as $uniqueKey) {
         $value1 = $parsedContentOfFile1[$uniqueKey] ?? null;
@@ -32,6 +30,7 @@ function makeDiff($parsedContentOfFile1, $parsedContentOfFile2)
                 'key' => $uniqueKey,
                 'value1' => makeDiff($value1, $value2),
                 'value2' => null];
+                continue;
         }
 
         if (!array_key_exists($uniqueKey, $parsedContentOfFile1)) {
@@ -39,6 +38,7 @@ function makeDiff($parsedContentOfFile1, $parsedContentOfFile2)
                 'key' => $uniqueKey,
                 'value1' => $value2,
                 'value2' => null];
+                continue;
         }
 
         if (!array_key_exists($uniqueKey, $parsedContentOfFile2)) {
@@ -46,6 +46,7 @@ function makeDiff($parsedContentOfFile1, $parsedContentOfFile2)
                 'key' => $uniqueKey,
                 'value1' => $value1,
                 'value2' => null];
+                continue;
         }
 
         if ($value1 === $value2) {
@@ -53,6 +54,7 @@ function makeDiff($parsedContentOfFile1, $parsedContentOfFile2)
             'key' => $uniqueKey,
             'value1' => $value1,
             'value2' => null];
+            continue;
         }
 
         if ($value1 !== $value2) {
@@ -60,7 +62,18 @@ function makeDiff($parsedContentOfFile1, $parsedContentOfFile2)
             'key' => $uniqueKey,
             'value1' => $value1,
             'value2' => $value2];
+            continue;
         }
     }
     return $differ;
+}
+
+function getSortedUniqueKeys(array $parsedContentOfFile1, array $parsedContentOfFile2): array
+{
+    $keysOfFile1 = array_keys($parsedContentOfFile1);
+    $keysOfFile2 = array_keys($parsedContentOfFile2);
+    $keysOfBothFiles = array_merge($keysOfFile1, $keysOfFile2);
+    $allUniqueKeys = array_unique($keysOfBothFiles);
+    sort($allUniqueKeys);
+    return $allUniqueKeys;
 }
