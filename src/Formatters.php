@@ -2,20 +2,12 @@
 
 namespace Differ\Formatters;
 
+use function Differ\Formatters\Stylish\stylishFormat;
+
 function makeFormat($diff, $formatName)
 {
-    var_export($diff);
-    $result = implode("\n", $diff);
-    return "{\n{$result}\n}";
-}
-
-function stringifyValue($value)
-{
-    if (is_null($value)) {
-        return 'null';
-    }
-    if (is_bool($value)) {
-        return $value ? 'true' : 'false';
-    }
-    return $value;
+    return match ($formatName) {
+        'stylish' => stylishFormat($diff),
+        default => exit("Unknown format '{$formatName}'!")
+    };
 }
