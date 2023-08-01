@@ -8,6 +8,6 @@ function makeFormat($diff, $formatName)
 {
     return match ($formatName) {
         'stylish' => stylishFormat($diff),
-        default => exit("Unknown format '{$formatName}'!")
+        default => exit("Unknown format '{$formatName}'!\n")
     };
 }

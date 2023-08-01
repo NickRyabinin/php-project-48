@@ -10,7 +10,11 @@ function stylishFormat(array $diff): string
     return var_export($diff);
 }
 
-function stringifyValue($value)
+function makeStringFromDiff(array $diff, int $level = 0): string
+{
+}
+
+function stringifyValue(mixed $value): mixed
 {
     if (is_null($value)) {
         return 'null';

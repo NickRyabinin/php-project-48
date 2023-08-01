@@ -26,9 +26,5 @@ function parse(string $pathToFile)
             exit("\nUnsupported format '{$extensionOfFile}' of incoming file!\n");
     }
 
-    echo "\nParsed Content:\n";
-    var_export($parsedContentOfFile);
-    echo "\n";
-
     return $parsedContentOfFile;
 }
