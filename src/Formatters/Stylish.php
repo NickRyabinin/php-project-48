@@ -10,9 +10,11 @@ function stylishFormat(array $diff): string
     return "{\n{$result}\n}";
 }
 
-function makeStringsFromDiff(array $diff): array
+function makeStringsFromDiff(array $diff, int $level = 0): array
 {
     $stringifiedDiff = [];
+    $spaces = getSpaces($level);
+    $nextLevel = $level + 1;
 
     foreach ($diff as $node) {
         $status = $node['status'];
@@ -22,32 +24,38 @@ function makeStringsFromDiff(array $diff): array
 
         switch ($status) {
             case 'nested':
-                $nested = makeStringsFromDiff($value1);
+                $nested = makeStringsFromDiff($value1, $nextLevel);
                 $stringifiedNest = implode("\n", $nested);
-                $stringifiedDiff[] = "    {$key}: {\n{$stringifiedNest}\n    }";
+                $stringifiedDiff[] = "{$spaces}    {$key}: {\n{$stringifiedNest}\n{$spaces}    }";
                 break;
             case 'same':
-                $stringifiedValue1 = stringifyValue($value1);
-                $stringifiedDiff[] = "    {$key}: {$stringifiedValue1}";
+                $stringifiedValue1 = stringifyValue($value1, $nextLevel);
+                $stringifiedDiff[] = "{$spaces}    {$key}: {$stringifiedValue1}";
                 break;
             case 'added':
-                $stringifiedValue1 = stringifyValue($value1);
-                $stringifiedDiff[] = "  + {$key}: {$stringifiedValue1}";
+                $stringifiedValue1 = stringifyValue($value1, $nextLevel);
+                $stringifiedDiff[] = "{$spaces}  + {$key}: {$stringifiedValue1}";
                 break;
             case 'removed':
-                $stringifiedValue1 = stringifyValue($value1);
-                $stringifiedDiff[] = "  - {$key}: {$stringifiedValue1}";
+                $stringifiedValue1 = stringifyValue($value1, $nextLevel);
+                $stringifiedDiff[] = "{$spaces}  - {$key}: {$stringifiedValue1}";
                 break;
             case 'updated':
-                $stringifiedValue1 = stringifyValue($value1);
-                $stringifiedValue2 = stringifyValue($value2);
-                $stringifiedDiff[] = "  - {$key}: {$stringifiedValue1}\n  + {$key}: {$stringifiedValue2}";
+                $stringifiedValue1 = stringifyValue($value1, $nextLevel);
+                $stringifiedValue2 = stringifyValue($value2, $nextLevel);
+                $stringifiedDiff[] =
+                    "{$spaces}  - {$key}: {$stringifiedValue1}\n{$spaces}  + {$key}: {$stringifiedValue2}";
         }
     }
     return $stringifiedDiff;
 }
 
-function stringifyValue(mixed $value): mixed
+function getSpaces(int $level): string
+{
+    return str_repeat('    ', $level);
+}
+
+function stringifyValue(mixed $value, $level): mixed
 {
     if (is_null($value)) {
         return 'null';
@@ -56,20 +64,24 @@ function stringifyValue(mixed $value): mixed
         return $value ? 'true' : 'false';
     }
     if (is_array($value)) {
-        $result = convertArrayToString($value);
-        return "{$result}\n";
+        $result = convertArrayToString($value, $level);
+        $spaces = getSpaces($level);
+        return "{{$result}\n{$spaces}}";
     }
     return "{$value}";
 }
 
-function convertArrayToString(array $value): string
+function convertArrayToString(array $value, $level): string
 {
     $keys = array_keys($value);
     $result = [];
+    $nextLevel = $level + 1;
 
-    $callback = function ($key) use ($value) {
-        $newValue = stringifyValue($value[$key]);
-        return "\n{$key}: {$newValue}";
+    $callback = function ($key) use ($value, $nextLevel) {
+        $newValue = stringifyValue($value[$key], $nextLevel);
+        $spaces = getSpaces($nextLevel);
+
+        return "\n{$spaces}{$key}: {$newValue}";
     };
 
     $result = array_map($callback, $keys);
