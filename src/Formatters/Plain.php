@@ -7,14 +7,14 @@ function plainFormat(array $diff): string
     $formattedDiff = makeStringsFromDiff($diff);
     $result = implode("\n", $formattedDiff);
 
-    return "{\n{$result}\n}";
+    return "\n{$result}\n";
 }
 
-function makeStringsFromDiff(array $diff, int $level = 0): array
+function makeStringsFromDiff(array $diff): array
 {
     $stringifiedDiff = [];
-    $spaces = getSpaces($level);
-    $nextLevel = $level + 1;
+    // $nested = [];
+    $fullPath = '';
 
     foreach ($diff as $node) {
         $status = $node['status'];
@@ -24,38 +24,36 @@ function makeStringsFromDiff(array $diff, int $level = 0): array
 
         switch ($status) {
             case 'nested':
-                $nested = makeStringsFromDiff($value1, $nextLevel);
-                $stringifiedNest = implode("\n", $nested);
-                $stringifiedDiff[] = "{$spaces}    {$key}: {\n{$stringifiedNest}\n{$spaces}    }";
+                $fullPath .= $key;
+                $nested = makeStringsFromDiff($value1);
+                $stringifiedDiff[] = $nested;
                 break;
             case 'same':
-                $stringifiedValue1 = stringifyValue($value1, $nextLevel);
-                $stringifiedDiff[] = "{$spaces}    {$key}: {$stringifiedValue1}";
                 break;
             case 'added':
-                $stringifiedValue1 = stringifyValue($value1, $nextLevel);
-                $stringifiedDiff[] = "{$spaces}  + {$key}: {$stringifiedValue1}";
+                $fullPath .= $key;
+                $stringifiedValue1 = stringifyValue($value1);
+                $stringifiedDiff[] = "Property '{$fullPath}' was added with value: {$stringifiedValue1}";
                 break;
             case 'removed':
-                $stringifiedValue1 = stringifyValue($value1, $nextLevel);
-                $stringifiedDiff[] = "{$spaces}  - {$key}: {$stringifiedValue1}";
+                $fullPath .= $key;
+                $stringifiedDiff[] = "Property '{$fullPath}' was removed";
                 break;
             case 'updated':
-                $stringifiedValue1 = stringifyValue($value1, $nextLevel);
-                $stringifiedValue2 = stringifyValue($value2, $nextLevel);
+                $fullPath .= $key;
+                $stringifiedValue1 = stringifyValue($value1);
+                $stringifiedValue2 = stringifyValue($value2);
                 $stringifiedDiff[] =
-                    "{$spaces}  - {$key}: {$stringifiedValue1}\n{$spaces}  + {$key}: {$stringifiedValue2}";
+                    "Property '{$fullPath}' was updated. From {$stringifiedValue1} to {$stringifiedValue2}";
         }
     }
+    echo "\nStringified Diff:\n";
+    var_export($stringifiedDiff);
+    echo "\n";
     return $stringifiedDiff;
 }
 
-function getSpaces(int $level): string
-{
-    return str_repeat('    ', $level);
-}
-
-function stringifyValue(mixed $value, $level): mixed
+function stringifyValue(mixed $value): mixed
 {
     if (is_null($value)) {
         return 'null';
@@ -67,22 +65,4 @@ function stringifyValue(mixed $value, $level): mixed
         return '[complex value]';
     }
     return "'{$value}'";
-}
-
-function convertArrayToString(array $value, $level): string
-{
-    $keys = array_keys($value);
-    $result = [];
-    $nextLevel = $level + 1;
-
-    $callback = function ($key) use ($value, $nextLevel) {
-        $newValue = stringifyValue($value[$key], $nextLevel);
-        $spaces = getSpaces($nextLevel);
-
-        return "\n{$spaces}{$key}: {$newValue}";
-    };
-
-    $result = array_map($callback, $keys);
-
-    return implode('', $result);
 }
