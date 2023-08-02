@@ -4,41 +4,47 @@ namespace Differ\Formatters\Stylish;
 
 function stylishFormat(array $diff): string
 {
-    $formattedDiff = makeStringFromDiff($diff);
-    return "{\n{$formattedDiff}\n}";
+    $formattedDiff = makeStringsFromDiff($diff);
+    $result = implode("\n", $formattedDiff);
+
+    return "{\n{$result}\n}";
 }
 
-function makeStringFromDiff(array $diff): string
+function makeStringsFromDiff(array $diff): array
 {
     $stringifiedDiff = [];
 
     foreach ($diff as $node) {
-        echo "\nNode:\n";
-        var_export($node);
-        echo "\n";
         $status = $node['status'];
         $key = $node['key'];
         $value1 = $node['value1'];
         $value2 = $node['value2'];
-        $stringifiedValue1 = (is_array($value1)) ? makeStringFromDiff($value1) : stringifyValue($value1);
 
         switch ($status) {
             case 'nested':
+                $nested = makeStringsFromDiff($value1);
+                $stringifiedNest = implode("\n", $nested);
+                $stringifiedDiff[] = "    {$key}: {\n{$stringifiedNest}\n    }";
+                break;
             case 'same':
+                $stringifiedValue1 = stringifyValue($value1);
                 $stringifiedDiff[] = "    {$key}: {$stringifiedValue1}";
                 break;
             case 'added':
+                $stringifiedValue1 = stringifyValue($value1);
                 $stringifiedDiff[] = "  + {$key}: {$stringifiedValue1}";
                 break;
             case 'removed':
+                $stringifiedValue1 = stringifyValue($value1);
                 $stringifiedDiff[] = "  - {$key}: {$stringifiedValue1}";
                 break;
             case 'updated':
-                $stringifiedValue2 = (is_array($value2)) ? makeStringFromDiff($value2) : stringifyValue($value2);
+                $stringifiedValue1 = stringifyValue($value1);
+                $stringifiedValue2 = stringifyValue($value2);
                 $stringifiedDiff[] = "  - {$key}: {$stringifiedValue1}\n  + {$key}: {$stringifiedValue2}";
         }
     }
-    return implode("\n", $stringifiedDiff);
+    return $stringifiedDiff;
 }
 
 function stringifyValue(mixed $value): mixed
@@ -49,5 +55,24 @@ function stringifyValue(mixed $value): mixed
     if (is_bool($value)) {
         return $value ? 'true' : 'false';
     }
-    return $value;
+    if (is_array($value)) {
+        $result = convertArrayToString($value);
+        return "{$result}\n";
+    }
+    return "{$value}";
+}
+
+function convertArrayToString(array $value): string
+{
+    $keys = array_keys($value);
+    $result = [];
+
+    $callback = function ($key) use ($value) {
+        $newValue = stringifyValue($value[$key]);
+        return "\n{$key}: {$newValue}";
+    };
+
+    $result = array_map($callback, $keys);
+
+    return implode('', $result);
 }
