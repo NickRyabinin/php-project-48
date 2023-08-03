@@ -9,7 +9,7 @@ function plainFormat(array $diff): string
     $formattedDiff = makeStringsFromDiff($diff);
     $result = implode("\n", $formattedDiff);
 
-    return "\n{$result}\n";
+    return "{$result}\n";
 }
 
 function makeStringsFromDiff(array $diff, string $path = ''): array
@@ -26,7 +26,7 @@ function makeStringsFromDiff(array $diff, string $path = ''): array
         switch ($status) {
             case 'nested':
                 $fullPath = "{$path}{$key}.";
-                $nested = makeStringsFromDiff($value1);
+                $nested = makeStringsFromDiff($value1, $fullPath);
                 $stringifiedDiff[] = $nested;
                 break;
             case 'same':
