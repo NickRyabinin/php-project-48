@@ -4,6 +4,7 @@ namespace Differ\Differ;
 
 use function Differ\Parsers\parse;
 use function Differ\Formatters\makeFormat;
+use function Functional\sort;
 
 function genDiff(string $pathToFile1, string $pathToFile2, string $formatName = 'stylish'): string
 {
@@ -74,6 +75,5 @@ function getSortedUniqueKeys(array $parsedContentOfFile1, array $parsedContentOf
     $keysOfFile2 = array_keys($parsedContentOfFile2);
     $keysOfBothFiles = array_merge($keysOfFile1, $keysOfFile2);
     $allUniqueKeys = array_unique($keysOfBothFiles);
-    sort($allUniqueKeys);
-    return $allUniqueKeys;
+    return sort($allUniqueKeys, fn ($left, $right) => strcmp($left, $right));
 }
