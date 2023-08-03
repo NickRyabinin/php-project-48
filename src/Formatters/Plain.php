@@ -12,36 +12,33 @@ function plainFormat(array $diff): string
     return "\n{$result}\n";
 }
 
-function makeStringsFromDiff(array $diff): array
+function makeStringsFromDiff(array $diff, string $path = ''): array
 {
     $stringifiedDiff = [];
-    $fullPath = '';
 
     foreach ($diff as $node) {
         $status = $node['status'];
         $key = $node['key'];
         $value1 = $node['value1'];
         $value2 = $node['value2'];
+        $fullPath = "{$path}{$key}";
 
         switch ($status) {
             case 'nested':
-                $fullPath .= $key;
+                $fullPath = "{$path}{$key}.";
                 $nested = makeStringsFromDiff($value1);
                 $stringifiedDiff[] = $nested;
                 break;
             case 'same':
                 break;
             case 'added':
-                $fullPath .= $key;
                 $stringifiedValue1 = stringifyValue($value1);
                 $stringifiedDiff[] = "Property '{$fullPath}' was added with value: {$stringifiedValue1}";
                 break;
             case 'removed':
-                $fullPath .= $key;
                 $stringifiedDiff[] = "Property '{$fullPath}' was removed";
                 break;
             case 'updated':
-                $fullPath .= $key;
                 $stringifiedValue1 = stringifyValue($value1);
                 $stringifiedValue2 = stringifyValue($value2);
                 $stringifiedDiff[] =
