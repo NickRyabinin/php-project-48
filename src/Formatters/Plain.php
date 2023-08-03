@@ -2,6 +2,8 @@
 
 namespace Differ\Formatters\Plain;
 
+use function Functional\flatten;
+
 function plainFormat(array $diff): string
 {
     $formattedDiff = makeStringsFromDiff($diff);
@@ -13,7 +15,6 @@ function plainFormat(array $diff): string
 function makeStringsFromDiff(array $diff): array
 {
     $stringifiedDiff = [];
-    // $nested = [];
     $fullPath = '';
 
     foreach ($diff as $node) {
@@ -47,10 +48,7 @@ function makeStringsFromDiff(array $diff): array
                     "Property '{$fullPath}' was updated. From {$stringifiedValue1} to {$stringifiedValue2}";
         }
     }
-    echo "\nStringified Diff:\n";
-    var_export($stringifiedDiff);
-    echo "\n";
-    return $stringifiedDiff;
+    return flatten($stringifiedDiff);
 }
 
 function stringifyValue(mixed $value): mixed
