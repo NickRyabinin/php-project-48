@@ -9,7 +9,7 @@ function plainFormat(array $diff): string
     $formattedDiff = makeStringsFromDiff($diff);
     $result = implode("\n", $formattedDiff);
 
-    return "{$result}\n";
+    return "{$result}";
 }
 
 function makeStringsFromDiff(array $diff, string $path = ''): array
