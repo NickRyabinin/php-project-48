@@ -55,7 +55,7 @@ function getSpaces(int $level): string
     return str_repeat('    ', $level);
 }
 
-function stringifyValue(mixed $value, $level): mixed
+function stringifyValue(mixed $value, int $level): mixed
 {
     if (is_null($value)) {
         return 'null';
@@ -71,7 +71,7 @@ function stringifyValue(mixed $value, $level): mixed
     return "{$value}";
 }
 
-function convertArrayToString(array $value, $level): string
+function convertArrayToString(array $value, int $level): string
 {
     $keys = array_keys($value);
     $result = [];
