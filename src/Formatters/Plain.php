@@ -14,9 +14,7 @@ function plainFormat(array $diff): string
 
 function makeStringsFromDiff(array $diff, string $path = ''): array
 {
-    $stringifiedDiff = [];
-
-    foreach ($diff as $node) {
+    $callback = function ($node) use ($path) {
         $status = $node['status'];
         $key = $node['key'];
         $value1 = $node['value1'];
@@ -26,26 +24,24 @@ function makeStringsFromDiff(array $diff, string $path = ''): array
         switch ($status) {
             case 'nested':
                 $fullPath = "{$path}{$key}.";
-                $nested = makeStringsFromDiff($value1, $fullPath);
-                $stringifiedDiff[] = $nested;
-                break;
-            case 'same':
-                break;
+                return makeStringsFromDiff($value1, $fullPath);
             case 'added':
                 $stringifiedValue1 = stringifyValue($value1);
-                $stringifiedDiff[] = "Property '{$fullPath}' was added with value: {$stringifiedValue1}";
-                break;
+                return "Property '{$fullPath}' was added with value: {$stringifiedValue1}";
             case 'removed':
-                $stringifiedDiff[] = "Property '{$fullPath}' was removed";
-                break;
+                return "Property '{$fullPath}' was removed";
             case 'updated':
                 $stringifiedValue1 = stringifyValue($value1);
                 $stringifiedValue2 = stringifyValue($value2);
-                $stringifiedDiff[] =
-                    "Property '{$fullPath}' was updated. From {$stringifiedValue1} to {$stringifiedValue2}";
+                return "Property '{$fullPath}' was updated. From {$stringifiedValue1} to {$stringifiedValue2}";
+            case 'same':
+                return;
         }
-    }
-    return flatten($stringifiedDiff);
+    };
+    $arrayOfDifferences = flatten(array_map($callback, $diff));
+    return array_filter($arrayOfDifferences, function ($valueOfDifference) {
+        return !is_null($valueOfDifference);
+    });
 }
 
 function stringifyValue(mixed $value): mixed
