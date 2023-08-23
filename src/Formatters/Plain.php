@@ -59,5 +59,8 @@ function stringifyValue(mixed $value): mixed
     if (is_array($value)) {
         return '[complex value]';
     }
+    if (is_numeric($value)) {
+        return $value;
+    }
     return "'{$value}'";
 }
