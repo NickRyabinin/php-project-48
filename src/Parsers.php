@@ -7,7 +7,7 @@ use Symfony\Component\Yaml\Yaml;
 function getFileContent(string $pathToFile)
 {
     $contentOfFile = @file_get_contents($pathToFile);
-    if ($contentOfFile) {
+    if ($contentOfFile !== false) {
         return $contentOfFile;
     }
     throw new \Exception("File not found", 1);
