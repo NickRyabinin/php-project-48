@@ -78,7 +78,5 @@ function convertArrayToString(array $value, int $level): string
         return "\n{$spaces}{$key}: {$newValue}";
     };
 
-    $result = array_map($callback, $keys);
-
-    return implode('', $result);
+    return implode('', array_map($callback, $keys));
 }
