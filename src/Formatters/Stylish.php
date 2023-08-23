@@ -16,10 +16,7 @@ function makeStringsFromDiff(array $diff, int $level = 0): array
     $nextLevel = $level + 1;
 
     $callback = function ($node) use ($spaces, $nextLevel) {
-        $status = $node['status'];
-        $key = $node['key'];
-        $value1 = $node['value1'];
-        $value2 = $node['value2'];
+        list('status' => $status, 'key' => $key, 'value1' => $value1, 'value2' => $value2) = $node;
 
         switch ($status) {
             case 'nested':
