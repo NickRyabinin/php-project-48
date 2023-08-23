@@ -15,10 +15,7 @@ function plainFormat(array $diff): string
 function makeStringsFromDiff(array $diff, string $path = ''): array
 {
     $callback = function ($node) use ($path) {
-        $status = $node['status'];
-        $key = $node['key'];
-        $value1 = $node['value1'];
-        $value2 = $node['value2'];
+        list('status' => $status, 'key' => $key, 'value1' => $value1, 'value2' => $value2) = $node;
         $fullPath = "{$path}{$key}";
 
         switch ($status) {
