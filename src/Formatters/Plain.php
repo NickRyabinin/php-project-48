@@ -23,8 +23,7 @@ function makeStringsFromDiff(array $diff, string $path = ''): array
 
         switch ($status) {
             case 'nested':
-                $fullPath = "{$path}{$key}.";
-                return makeStringsFromDiff($value1, $fullPath);
+                return makeStringsFromDiff($value1, "{$path}{$key}.");
             case 'added':
                 $stringifiedValue1 = stringifyValue($value1);
                 return "Property '{$fullPath}' was added with value: {$stringifiedValue1}";
