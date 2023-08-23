@@ -19,54 +19,48 @@ function genDiff(string $pathToFile1, string $pathToFile2, string $formatName = 
 
 function makeDiff(array $parsedContentOfFile1, array $parsedContentOfFile2): array
 {
-    $differ = [];
     $allUniqueKeys = getSortedUniqueKeys($parsedContentOfFile1, $parsedContentOfFile2);
 
-    foreach ($allUniqueKeys as $uniqueKey) {
+    $callback = function ($uniqueKey) use ($parsedContentOfFile1, $parsedContentOfFile2) {
         $value1 = $parsedContentOfFile1[$uniqueKey] ?? null;
         $value2 = $parsedContentOfFile2[$uniqueKey] ?? null;
 
         if (is_array($value1) && is_array($value2)) {
-            $differ[] = ['status' => 'nested',
+            return ['status' => 'nested',
                 'key' => $uniqueKey,
                 'value1' => makeDiff($value1, $value2),
                 'value2' => null];
-                continue;
         }
 
         if (!array_key_exists($uniqueKey, $parsedContentOfFile1)) {
-            $differ[] = ['status' => 'added',
+            return ['status' => 'added',
                 'key' => $uniqueKey,
                 'value1' => $value2,
                 'value2' => null];
-                continue;
         }
 
         if (!array_key_exists($uniqueKey, $parsedContentOfFile2)) {
-            $differ[] = ['status' => 'removed',
+            return ['status' => 'removed',
                 'key' => $uniqueKey,
                 'value1' => $value1,
                 'value2' => null];
-                continue;
         }
 
         if ($value1 === $value2) {
-            $differ[] = ['status' => 'same',
+            return ['status' => 'same',
             'key' => $uniqueKey,
             'value1' => $value1,
             'value2' => null];
-            continue;
         }
 
         if ($value1 !== $value2) {
-            $differ[] = ['status' => 'updated',
+            return ['status' => 'updated',
             'key' => $uniqueKey,
             'value1' => $value1,
             'value2' => $value2];
-            continue;
         }
-    }
-    return $differ;
+    };
+    return array_map($callback, $allUniqueKeys);
 }
 
 function getSortedUniqueKeys(array $parsedContentOfFile1, array $parsedContentOfFile2): array
