@@ -17,26 +17,32 @@ function makeStringsFromDiff(array $diff, int $level = 0): array
 
     $callback = function ($node) use ($spaces, $nextLevel) {
         list('status' => $status, 'key' => $key, 'value1' => $value1, 'value2' => $value2) = $node;
-
+        $output = '';
         switch ($status) {
             case 'nested':
                 $nested = makeStringsFromDiff($value1, $nextLevel);
                 $stringifiedNest = implode("\n", $nested);
-                return "{$spaces}    {$key}: {\n{$stringifiedNest}\n{$spaces}    }";
+                $output =  "{$spaces}    {$key}: {\n{$stringifiedNest}\n{$spaces}    }";
+                break;
             case 'same':
                 $stringifiedValue1 = stringifyValue($value1, $nextLevel);
-                return "{$spaces}    {$key}: {$stringifiedValue1}";
+                $output = "{$spaces}    {$key}: {$stringifiedValue1}";
+                break;
             case 'added':
                 $stringifiedValue1 = stringifyValue($value1, $nextLevel);
-                return "{$spaces}  + {$key}: {$stringifiedValue1}";
+                $output = "{$spaces}  + {$key}: {$stringifiedValue1}";
+                break;
             case 'removed':
                 $stringifiedValue1 = stringifyValue($value1, $nextLevel);
-                return "{$spaces}  - {$key}: {$stringifiedValue1}";
+                $output = "{$spaces}  - {$key}: {$stringifiedValue1}";
+                break;
             case 'updated':
                 $stringifiedValue1 = stringifyValue($value1, $nextLevel);
                 $stringifiedValue2 = stringifyValue($value2, $nextLevel);
-                return "{$spaces}  - {$key}: {$stringifiedValue1}\n{$spaces}  + {$key}: {$stringifiedValue2}";
+                $output = "{$spaces}  - {$key}: {$stringifiedValue1}\n{$spaces}  + {$key}: {$stringifiedValue2}";
+                break;
         }
+        return $output;
     };
     return array_map($callback, $diff);
 }
