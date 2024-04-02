@@ -32,35 +32,23 @@ function checkDifference(mixed $uniqueKey, array $parsedContentOfFile1, array $p
     $value1 = $parsedContentOfFile1[$uniqueKey] ?? null;
     $value2 = $parsedContentOfFile2[$uniqueKey] ?? null;
     if (is_array($value1) && is_array($value2)) {
-            return ['status' => 'nested',
-                'key' => $uniqueKey,
-                'value1' => makeDiff($value1, $value2),
-                'value2' => null];
+        return ['status' => 'nested', 'key' => $uniqueKey,
+            'value1' => makeDiff($value1, $value2), 'value2' => null];
     }
     if (!array_key_exists($uniqueKey, $parsedContentOfFile1)) {
-            return ['status' => 'added',
-                'key' => $uniqueKey,
-                'value1' => $value2,
-                'value2' => null];
+        return ['status' => 'added', 'key' => $uniqueKey,
+            'value1' => $value2, 'value2' => null];
     }
     if (!array_key_exists($uniqueKey, $parsedContentOfFile2)) {
-            return ['status' => 'removed',
-                'key' => $uniqueKey,
-                'value1' => $value1,
-                'value2' => null];
+        return ['status' => 'removed', 'key' => $uniqueKey,
+            'value1' => $value1, 'value2' => null];
     }
     if ($value1 === $value2) {
-            return ['status' => 'same',
-            'key' => $uniqueKey,
-            'value1' => $value1,
-            'value2' => null];
+        return ['status' => 'same', 'key' => $uniqueKey,
+            'value1' => $value1, 'value2' => null];
     }
-    if ($value1 !== $value2) {
-            return ['status' => 'updated',
-            'key' => $uniqueKey,
-            'value1' => $value1,
-            'value2' => $value2];
-    }
+    return ['status' => 'updated', 'key' => $uniqueKey,
+            'value1' => $value1, 'value2' => $value2];
 }
 
 function getSortedUniqueKeys(array $parsedContentOfFile1, array $parsedContentOfFile2): array
