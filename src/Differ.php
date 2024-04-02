@@ -22,45 +22,45 @@ function makeDiff(array $parsedContentOfFile1, array $parsedContentOfFile2): arr
     $allUniqueKeys = getSortedUniqueKeys($parsedContentOfFile1, $parsedContentOfFile2);
 
     $callback = function ($uniqueKey) use ($parsedContentOfFile1, $parsedContentOfFile2) {
-        $value1 = $parsedContentOfFile1[$uniqueKey] ?? null;
-        $value2 = $parsedContentOfFile2[$uniqueKey] ?? null;
+        return checkDifference($uniqueKey, $parsedContentOfFile1, $parsedContentOfFile2);
+    };
+    return array_map($callback, $allUniqueKeys);
+}
 
-        if (is_array($value1) && is_array($value2)) {
+function checkDifference(mixed $uniqueKey, array $parsedContentOfFile1, array $parsedContentOfFile2): array
+{
+    $value1 = $parsedContentOfFile1[$uniqueKey] ?? null;
+    $value2 = $parsedContentOfFile2[$uniqueKey] ?? null;
+    if (is_array($value1) && is_array($value2)) {
             return ['status' => 'nested',
                 'key' => $uniqueKey,
                 'value1' => makeDiff($value1, $value2),
                 'value2' => null];
-        }
-
-        if (!array_key_exists($uniqueKey, $parsedContentOfFile1)) {
+    }
+    if (!array_key_exists($uniqueKey, $parsedContentOfFile1)) {
             return ['status' => 'added',
                 'key' => $uniqueKey,
                 'value1' => $value2,
                 'value2' => null];
-        }
-
-        if (!array_key_exists($uniqueKey, $parsedContentOfFile2)) {
+    }
+    if (!array_key_exists($uniqueKey, $parsedContentOfFile2)) {
             return ['status' => 'removed',
                 'key' => $uniqueKey,
                 'value1' => $value1,
                 'value2' => null];
-        }
-
-        if ($value1 === $value2) {
+    }
+    if ($value1 === $value2) {
             return ['status' => 'same',
             'key' => $uniqueKey,
             'value1' => $value1,
             'value2' => null];
-        }
-
-        if ($value1 !== $value2) {
+    }
+    if ($value1 !== $value2) {
             return ['status' => 'updated',
             'key' => $uniqueKey,
             'value1' => $value1,
             'value2' => $value2];
-        }
-    };
-    return array_map($callback, $allUniqueKeys);
+    }
 }
 
 function getSortedUniqueKeys(array $parsedContentOfFile1, array $parsedContentOfFile2): array
