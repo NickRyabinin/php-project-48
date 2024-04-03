@@ -42,17 +42,11 @@ function makeStringsFromDiff(array $diff, string $path = ''): array
 
 function stringifyValue(mixed $value): mixed
 {
-    if (is_null($value)) {
-        return 'null';
-    }
-    if (is_bool($value)) {
-        return $value ? 'true' : 'false';
-    }
-    if (is_array($value)) {
-        return '[complex value]';
-    }
-    if (is_numeric($value)) {
-        return $value;
-    }
-    return "'{$value}'";
+    return match (true) {
+        is_null($value) => 'null',
+        is_bool($value) => $value ? 'true' : 'false',
+        is_array($value) => '[complex value]',
+        is_numeric($value) => $value,
+        default => "'{$value}'",
+    };
 }
