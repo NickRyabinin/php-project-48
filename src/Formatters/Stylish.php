@@ -15,36 +15,51 @@ function makeStringsFromDiff(array $diff, int $level = 0): array
     $spaces = getSpaces($level);
     $nextLevel = $level + 1;
 
-    $callback = function ($node) use ($spaces, $nextLevel) {
-        list('status' => $status, 'key' => $key, 'value1' => $value1, 'value2' => $value2) = $node;
-        $output = '';
-        switch ($status) {
-            case 'nested':
-                $nested = makeStringsFromDiff($value1, $nextLevel);
-                $stringifiedNest = implode("\n", $nested);
-                $output =  "{$spaces}    {$key}: {\n{$stringifiedNest}\n{$spaces}    }";
-                break;
-            case 'same':
-                $stringifiedValue1 = stringifyValue($value1, $nextLevel);
-                $output = "{$spaces}    {$key}: {$stringifiedValue1}";
-                break;
-            case 'added':
-                $stringifiedValue1 = stringifyValue($value1, $nextLevel);
-                $output = "{$spaces}  + {$key}: {$stringifiedValue1}";
-                break;
-            case 'removed':
-                $stringifiedValue1 = stringifyValue($value1, $nextLevel);
-                $output = "{$spaces}  - {$key}: {$stringifiedValue1}";
-                break;
-            case 'updated':
-                $stringifiedValue1 = stringifyValue($value1, $nextLevel);
-                $stringifiedValue2 = stringifyValue($value2, $nextLevel);
-                $output = "{$spaces}  - {$key}: {$stringifiedValue1}\n{$spaces}  + {$key}: {$stringifiedValue2}";
-                break;
-        }
-        return $output;
+    $formatNode = function ($node) use ($spaces, $nextLevel) {
+        ['status' => $status, 'key' => $key, 'value1' => $value1, 'value2' => $value2] = $node;
+        return match ($status) {
+            'nested' => formatNested($key, $value1, $spaces, $nextLevel),
+            'same' => formatSame($key, $value1, $spaces, $nextLevel),
+            'added' => formatAdded($key, $value1, $spaces, $nextLevel),
+            'removed' => formatRemoved($key, $value1, $spaces, $nextLevel),
+            'updated' => formatUpdated($node, $spaces, $nextLevel)
+        };
     };
-    return array_map($callback, $diff);
+
+    return array_map($formatNode, $diff);
+}
+
+function formatNested(mixed $key, mixed $value, string $spaces, int $nextLevel): string
+{
+    $nested = makeStringsFromDiff($value, $nextLevel);
+    $stringifiedNest = implode("\n", $nested);
+    return "{$spaces}    {$key}: {\n{$stringifiedNest}\n{$spaces}    }";
+}
+
+function formatSame(mixed $key, mixed $value, string $spaces, int $nextLevel): string
+{
+    $stringifiedValue = stringifyValue($value, $nextLevel);
+    return "{$spaces}    {$key}: {$stringifiedValue}";
+}
+
+function formatAdded(mixed $key, mixed $value, string $spaces, int $nextLevel): string
+{
+    $stringifiedValue = stringifyValue($value, $nextLevel);
+    return "{$spaces}  + {$key}: {$stringifiedValue}";
+}
+
+function formatRemoved(mixed $key, mixed $value, string $spaces, int $nextLevel): string
+{
+    $stringifiedValue = stringifyValue($value, $nextLevel);
+    return "{$spaces}  - {$key}: {$stringifiedValue}";
+}
+
+function formatUpdated(array $node, string $spaces, int $nextLevel): string
+{
+    extract($node);
+    $stringifiedValue1 = stringifyValue($value1, $nextLevel);
+    $stringifiedValue2 = stringifyValue($value2, $nextLevel);
+    return "{$spaces}  - {$key}: {$stringifiedValue1}\n{$spaces}  + {$key}: {$stringifiedValue2}";
 }
 
 function getSpaces(int $level): string
